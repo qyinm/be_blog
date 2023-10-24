@@ -29,5 +29,4 @@ public class UserService {
                 .build();
         return userRepository.save(user);
     }
-
 }

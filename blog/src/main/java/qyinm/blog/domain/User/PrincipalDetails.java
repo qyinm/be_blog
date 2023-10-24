@@ -9,6 +9,10 @@ public class PrincipalDetails implements UserDetails {
     
     private User user;
 
+    public PrincipalDetails(User user) {
+        this.user = user;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         // TODO Auto-generated method stub
