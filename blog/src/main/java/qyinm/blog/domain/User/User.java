@@ -1,5 +1,7 @@
 package qyinm.blog.domain.User;
 
+import org.springframework.security.core.userdetails.UserDetails;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -10,7 +12,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-@Table(name = "user")
+@Table(name = "users")
 @Entity
 public class User {
 
@@ -32,5 +34,9 @@ public class User {
 
     public String getEmail() {
         return this.email;
+    }
+
+    public UserDetails toUserDetails() {
+        return new PrincipalDetails(this);
     }
 }
