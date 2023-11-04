@@ -54,7 +54,8 @@ public class SecurityConfig {
                     authorize.requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                             .requestMatchers("/api/signin").permitAll()
                             .requestMatchers(PathRequest.toH2Console()).permitAll()
-                            .anyRequest().authenticated();
+                            // .anyRequest().authenticated();
+                            .anyRequest().permitAll();
                 })
                 // enable h2-console
                 .headers(headers -> headers.frameOptions(options -> options.sameOrigin()))
