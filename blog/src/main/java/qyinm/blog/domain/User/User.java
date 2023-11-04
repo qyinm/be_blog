@@ -7,10 +7,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @Table(name = "users")
 @Entity
@@ -24,9 +28,7 @@ public class User {
 
     private String password;
 
-    private String nickname;
-
-    private boolean activated;
+    private Role role;
 
     public String getPassword() {
         return this.password;
@@ -34,6 +36,10 @@ public class User {
 
     public String getEmail() {
         return this.email;
+    }
+
+    public String getRole() {
+        return this.role.getRole();
     }
 
     public UserDetails toUserDetails() {

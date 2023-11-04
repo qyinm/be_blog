@@ -1,17 +1,14 @@
 package qyinm.blog.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@Getter
-@Setter
+/**
+ * TokenDto
+ */
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor 
-public class TokenDto {
+public record TokenDto(
+    String accessToken,
+    String refreshToken
+) {
 
-    private String token;
 }

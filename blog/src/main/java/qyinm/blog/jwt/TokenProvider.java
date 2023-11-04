@@ -1,6 +1,7 @@
 package qyinm.blog.jwt;
 
 import java.security.Key;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -25,6 +26,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import qyinm.blog.dto.TokenUserInfo;
 
 @Component
 public class TokenProvider implements InitializingBean {
@@ -66,6 +68,24 @@ public class TokenProvider implements InitializingBean {
                 .compact();
     }
 
+    public String generateAccessToken(TokenUserInfo tokenUserInfo) {
+
+        return Jwts.builder()
+                .signWith(key, SignatureAlgorithm.HS512)
+                .setSubject(tokenUserInfo.userEmail())
+                .setExpiration(getExpireDate(Duration.ofMinutes(30)))
+                .compact();
+    }
+
+    public String generateRefreshToken(TokenUserInfo tokenUserInfo) {
+
+        return Jwts.builder()
+                .signWith(key, SignatureAlgorithm.HS512)
+                .setClaims(tokenUserInfo.toClaims())
+                .setExpiration(getExpireDate(Duration.ofDays(2)))
+                .compact();
+    }
+
     public Authentication getAuthentication(String token) {
 
         Claims claims = Jwts.parserBuilder()
@@ -81,6 +101,12 @@ public class TokenProvider implements InitializingBean {
         User principal = new User(claims.getSubject(), "", authorities);
 
         return new UsernamePasswordAuthenticationToken(principal, token, authorities);
+    }
+
+    private Date getExpireDate(Duration duration) {
+        long now = (new Date()).getTime();
+
+        return new Date(now + duration.toMillis());
     }
 
     public boolean validateToken(String token) {

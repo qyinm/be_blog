@@ -1,12 +1,6 @@
 package qyinm.blog.controller;
 
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,10 +8,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import qyinm.blog.dto.LoginDto;
+import qyinm.blog.domain.User.User;
 import qyinm.blog.dto.TokenDto;
-import qyinm.blog.jwt.JwtFilter;
+import qyinm.blog.dto.TokenUserInfo;
+import qyinm.blog.dto.UserDto;
 import qyinm.blog.jwt.TokenProvider;
+import qyinm.blog.service.UserService;
 
 @RequiredArgsConstructor
 @RestController
@@ -25,22 +21,26 @@ import qyinm.blog.jwt.TokenProvider;
 public class AuthController {
 
     private final TokenProvider tokenProvider;
-    private final AuthenticationManagerBuilder authenticationManagerBuilder;
+    private final UserService userService;
 
-    @PostMapping("/authenticate")
-    public ResponseEntity<TokenDto> authorize(@Valid @RequestBody LoginDto loginDto) {
+    @PostMapping("/signin")
+    public ResponseEntity<TokenDto> authorize(@Valid @RequestBody UserDto userDto) {
 
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                loginDto.getUsername(), loginDto.getPassword());
+        User user = userService.signin(userDto);
 
-        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        TokenUserInfo tokenUserInfo = TokenUserInfo.builder()
+                .userEmail(userDto.getEmail())
+                .authorities(user.getRole())
+                .build();
 
-        String jwt = tokenProvider.createToken(authentication);
+        String accessToken = tokenProvider.generateAccessToken(tokenUserInfo);
+        String refreshToken = tokenProvider.generateRefreshToken(tokenUserInfo);
 
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add(JwtFilter.AUTHORIZATION_HEADER, "Bearer " + jwt);
+        TokenDto tokenDto = TokenDto.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
 
-        return new ResponseEntity<>(new TokenDto(jwt), httpHeaders, HttpStatus.OK);
+        return ResponseEntity.ok(tokenDto);
     }
 }
