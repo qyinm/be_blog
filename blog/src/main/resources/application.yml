@@ -31,3 +31,16 @@ jwt:
 logging:
   level:
     me.silvernine: DEBUG
+
+cloud:
+  aws:
+    s3:
+      bucket: iamseungwoo-blog-images
+    credentials:
+      access-key: AKIASC7Y75ASMB2JPTBD
+      secret-key: 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
+    region:
+      static: ap-northeast-2
+      auto: false
+    stack:
+      auto: false
