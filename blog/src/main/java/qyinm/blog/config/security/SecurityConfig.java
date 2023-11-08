@@ -18,10 +18,10 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 import jakarta.servlet.http.HttpServletRequest;
-import qyinm.blog.jwt.JwtAccessDeniedHandler;
-import qyinm.blog.jwt.JwtAuthenticationEntryPoint;
-import qyinm.blog.jwt.JwtSecurityConfig;
-import qyinm.blog.jwt.TokenProvider;
+import qyinm.blog.common.jwt.JwtAccessDeniedHandler;
+import qyinm.blog.common.jwt.JwtAuthenticationEntryPoint;
+import qyinm.blog.common.jwt.JwtSecurityConfig;
+import qyinm.blog.common.util.jwt.TokenProvider;
 
 @Configuration
 @EnableWebSecurity

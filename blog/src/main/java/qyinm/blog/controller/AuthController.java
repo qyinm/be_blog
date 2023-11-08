@@ -8,11 +8,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import qyinm.blog.common.util.jwt.TokenProvider;
 import qyinm.blog.domain.User.User;
 import qyinm.blog.dto.TokenDto;
 import qyinm.blog.dto.TokenUserInfo;
 import qyinm.blog.dto.UserDto;
-import qyinm.blog.jwt.TokenProvider;
 import qyinm.blog.service.UserService;
 
 @RequiredArgsConstructor
@@ -25,11 +25,10 @@ public class AuthController {
 
     @PostMapping("/signin")
     public ResponseEntity<TokenDto> authorize(@Valid @RequestBody UserDto userDto) {
-
         User user = userService.signin(userDto);
 
         TokenUserInfo tokenUserInfo = TokenUserInfo.builder()
-                .userEmail(userDto.getEmail())
+                .userEmail(user.getEmail())
                 .authorities(user.getRole())
                 .build();
 

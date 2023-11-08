@@ -1,10 +1,11 @@
-package qyinm.blog.jwt;
+package qyinm.blog.common.util.jwt;
 
 import java.security.Key;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -17,6 +18,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -28,11 +30,14 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import qyinm.blog.dto.TokenUserInfo;
 
+import static qyinm.blog.common.constants.jwt.JwtConstants.*;
+
 @Component
 public class TokenProvider implements InitializingBean {
 
     private final Logger logger = LoggerFactory.getLogger(TokenProvider.class);
     private static final String AUTHORITIES_KEY = "auth";
+    private static final String USER_ID = "userId";
     private final String secret;
     private final long tokenValidityInMilliseconds;
     private Key key;
@@ -72,7 +77,7 @@ public class TokenProvider implements InitializingBean {
 
         return Jwts.builder()
                 .signWith(key, SignatureAlgorithm.HS512)
-                .setSubject(tokenUserInfo.userEmail())
+                .setClaims(createClaims(tokenUserInfo))
                 .setExpiration(getExpireDate(Duration.ofMinutes(30)))
                 .compact();
     }
@@ -81,9 +86,31 @@ public class TokenProvider implements InitializingBean {
 
         return Jwts.builder()
                 .signWith(key, SignatureAlgorithm.HS512)
-                .setClaims(tokenUserInfo.toClaims())
+                .setClaims(createClaims(tokenUserInfo))
                 .setExpiration(getExpireDate(Duration.ofDays(2)))
                 .compact();
+    }
+
+    public String resolveToken(String authHeader) {
+        if (StringUtils.hasText(authHeader) && authHeader.startsWith(TOKEN_PREFIX.getValue())) {
+            return authHeader.substring(TOKEN_PREFIX.getValue().length());
+        }
+        return "";
+    }
+
+    public Map<String, Object> createClaims(TokenUserInfo dto) {
+        return Map.of(USER_ID, dto.userId(),
+                AUTHORITIES_KEY, dto.authorities()
+        );
+    }
+
+    public TokenUserInfo getUserInfoFromToken(String token) {
+        Claims claims = getClaimsFromToken(token);
+
+        return TokenUserInfo.builder()
+                .userId(claims.get(USER_ID, Long.class))
+                .authorities(claims.get(AUTHORITIES_KEY, String.class))
+                .build();
     }
 
     public Authentication getAuthentication(String token) {
@@ -123,5 +150,13 @@ public class TokenProvider implements InitializingBean {
             logger.info("JWT 토큰이 잘못되었습니다.");
         }
         return false;
+    }
+
+    public Claims getClaimsFromToken(String token) {
+        return Jwts.parserBuilder()
+        .setSigningKey(key)
+        .build()
+        .parseClaimsJws(token)
+        .getBody();
     }
 }

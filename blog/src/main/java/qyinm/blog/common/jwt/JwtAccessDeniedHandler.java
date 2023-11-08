@@ -1,4 +1,4 @@
-package qyinm.blog.jwt;
+package qyinm.blog.common.jwt;
 
 import java.io.IOException;
 
