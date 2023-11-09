@@ -18,31 +18,23 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import qyinm.blog.common.jwt.JwtAccessDeniedHandler;
 import qyinm.blog.common.jwt.JwtAuthenticationEntryPoint;
 import qyinm.blog.common.jwt.JwtSecurityConfig;
-import qyinm.blog.common.util.jwt.TokenProvider;
 
+@RequiredArgsConstructor
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    private final TokenProvider tokenProvider;
+    private final JwtSecurityConfig jwtSecurityConfig;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
-    public SecurityConfig(
-            TokenProvider tokenProvider,
-            JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
-            JwtAccessDeniedHandler jwtAccessDeniedHandler) {
-        this.tokenProvider = tokenProvider;
-        this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
-        this.jwtAccessDeniedHandler = jwtAccessDeniedHandler;
-    }
-
     @Bean
-    public PasswordEncoder passwordEncoder() {
+    public static PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
@@ -80,7 +72,7 @@ public class SecurityConfig {
                 })
                 // enable h2-console
                 .headers(headers -> headers.frameOptions(options -> options.sameOrigin()))
-                .apply(new JwtSecurityConfig(tokenProvider));
+                .apply(jwtSecurityConfig);
         ;
 
         return httpSecurity.build();

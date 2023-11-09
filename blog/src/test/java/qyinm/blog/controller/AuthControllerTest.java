@@ -55,7 +55,7 @@ public class AuthControllerTest {
                 .email(user.getEmail())
                 .password(user.getPassword())
                 .build();
-        userService.signup(userDto);
+        User save = userService.signup(userDto);
 
         String body = objectMapper.writeValueAsString(userDto);
 

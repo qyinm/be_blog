@@ -40,4 +40,11 @@ public class UserService {
 
         return user;
     }
+
+    public String getUserEmailByUserId(Long userId) {
+        User findUser = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("없는 유저입니다"));
+
+        return findUser.getEmail();
+    }
 }
