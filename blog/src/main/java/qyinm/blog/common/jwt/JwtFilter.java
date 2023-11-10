@@ -36,7 +36,7 @@ public class JwtFilter extends OncePerRequestFilter {
             "/api/v1/users/test/**",
             "/api/signin",
             "/api/signup",
-            "/api/article",
+            // "/api/article",
             "/api/v1/users/refresh");
 
     @Override
