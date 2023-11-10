@@ -3,6 +3,7 @@ package qyinm.blog.controller.Article;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static qyinm.blog.common.constants.jwt.JwtConstants.*;
 
@@ -25,6 +26,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import qyinm.blog.common.util.jwt.TokenProvider;
 import qyinm.blog.domain.Article.ArticleRepository;
+import qyinm.blog.domain.User.Role;
+import qyinm.blog.domain.User.User;
+import qyinm.blog.domain.User.UserRepository;
 import qyinm.blog.dto.TokenUserInfo;
 import qyinm.blog.dto.Article.ArticleDto;
 import qyinm.blog.dto.Tag.TagDto;
@@ -49,12 +53,25 @@ public class ArticleControllerTest {
     String accessToken;
     String refreshToken;
 
-    @MockBean
-    UserService userService;
+    @Autowired
+    UserRepository userRepository;
 
     @BeforeEach
     void getAccessToken() {
-        when(userService.getUserEmailByUserId(any())).thenReturn("test@test.com");
+        // when(userService.getUserByEmail("test@test.com"))
+        //         .thenReturn(User.builder()
+        //                 .id(1L)
+        //                 .email("test@test.com")
+        //                 .password("")
+        //                 .role(Role.USER)
+        //                 .build());
+        // when(userService.getUserEmailByUserId(1L)).thenReturn("test@test.com");
+        userRepository.save(User.builder()
+                         .id(1L)
+                         .email("test@test.com")
+                         .password("")
+                         .role(Role.USER)
+                         .build());
         TokenUserInfo tokenUserInfo = TokenUserInfo.builder()
                 .userId(1L)
                 .authorities("USER")
@@ -93,7 +110,8 @@ public class ArticleControllerTest {
         result
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("test"))
-                .andExpect(jsonPath("$.tags.length()").value(tags.size()));
+                .andExpect(jsonPath("$.tags.length()").value(tags.size()))
+                .andDo(print());
     }
 
     @DisplayName("access token 없이 article 생성")
@@ -115,7 +133,8 @@ public class ArticleControllerTest {
 
         assertThatIllegalArgumentException().isThrownBy(() -> mockMvc.perform(post(url)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(body)));
+                .content(body))
+                .andDo(print()));
     }
 
     @DisplayName("access token 없이 refresh token으로 access token 재발급해서 article 생성")
@@ -144,7 +163,8 @@ public class ArticleControllerTest {
         result
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("test"))
-                .andExpect(jsonPath("$.tags.length()").value(tags.size()));
+                .andExpect(jsonPath("$.tags.length()").value(tags.size()))
+                .andDo(print());
     }
 
     @DisplayName("access token 없이 잘못된 refresh token으로 생성 시도, 에러남.")
@@ -168,6 +188,7 @@ public class ArticleControllerTest {
                 .header(AUTHORIZATION_HEADER.getValue(), TOKEN_PREFIX.getValue() + "")
                 .cookie(new Cookie(REFRESH_TOKEN.getValue(), refreshToken + "asdf"))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(body))).isInstanceOf(io.jsonwebtoken.security.SecurityException.class);
+                .content(body))
+                .andDo(print())).isInstanceOf(io.jsonwebtoken.security.SecurityException.class);
     }
 }

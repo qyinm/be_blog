@@ -28,7 +28,7 @@ public class AuthController {
         User user = userService.signin(userDto);
 
         TokenUserInfo tokenUserInfo = TokenUserInfo.builder()
-                .userId(user.getUserId())
+                .userId(user.getId())
                 .authorities(user.getRole())
                 .build();
 

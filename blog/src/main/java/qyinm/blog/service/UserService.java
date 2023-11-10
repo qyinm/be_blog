@@ -42,9 +42,17 @@ public class UserService {
     }
 
     public String getUserEmailByUserId(Long userId) {
-        User findUser = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("없는 유저입니다"));
-
+        User findUser = getUserByUserid(userId);
         return findUser.getEmail();
+    }
+
+    public User getUserByUserid(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("없는 유저입니다"));
+    }
+
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("없는 유저입니다"));
     }
 }

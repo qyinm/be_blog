@@ -54,4 +54,10 @@ public class Article {
                 )
                 .toList();
     }
+
+    public Article addUser(User user) {
+        this.user = user;
+        user.addArticle(this);
+        return this;
+    }
 }
